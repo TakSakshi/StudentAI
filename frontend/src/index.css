@@ -4,8 +4,13 @@
 
 @layer base {
   body {
-    @apply bg-background text-main antialiased selection:bg-sage-light selection:text-forest;
+    @apply bg-background text-main antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  ::selection {
+    background-color: #EDF2E9;
+    color: #244C3C;
   }
 
   h1, h2, h3, .font-editorial {
