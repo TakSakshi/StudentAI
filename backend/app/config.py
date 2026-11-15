@@ -12,8 +12,8 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
     app_env: str = "development"
     debug: bool = True
-    port: int = 8000
-    host: str = "0.0.0.0"
+    port: int = int(os.getenv("PORT", "8001"))
+    host: str = os.getenv("HOST", "0.0.0.0")
 
     # Base path resolution (project root)
     base_dir: Path = Path(__file__).resolve().parent.parent.parent
@@ -27,7 +27,13 @@ class Settings(BaseSettings):
     comparison_csv_path: Path = base_dir / "reports" / "model_comparison.csv"
 
     # CORS configuration
-    cors_origins: list = ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"]
+    cors_origins: list = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://localhost:8001",
+        "http://127.0.0.1:8001",
+    ]
 
     class Config:
         env_file = ".env"

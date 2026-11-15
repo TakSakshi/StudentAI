@@ -20,18 +20,19 @@ if [ ! -f "models/best_model.pkl" ]; then
     ./venv/bin/python -m src.train
 fi
 
-echo "Starting FastAPI Backend on http://localhost:8000..."
-./venv/bin/uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 &
+PORT=${PORT:-8001}
+echo "Starting FastAPI Backend on http://localhost:${PORT}..."
+./venv/bin/uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT} &
 BACKEND_PID=$!
 
 echo "Starting React Frontend on http://localhost:5173..."
 npm run dev --prefix frontend &
 FRONTEND_PID=$!
 
-trap "kill $BACKEND_PID $FRONTEND_PID; exit" SIGINT SIGTERM EXIT
+trap "kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit" SIGINT SIGTERM EXIT
 
 echo ""
-echo ">> FastAPI Backend: http://localhost:8000 (API Docs: http://localhost:8000/api/docs)"
+echo ">> FastAPI Backend: http://localhost:${PORT} (API Docs: http://localhost:${PORT}/docs)"
 echo ">> React Frontend:  http://localhost:5173"
 echo "Press Ctrl+C to stop both servers."
 wait
