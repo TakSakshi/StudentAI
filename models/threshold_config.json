@@ -1,0 +1,19 @@
+{
+  "score_threshold": 40.0,
+  "classification_threshold": 0.6,
+  "risk_bands": {
+    "low": {
+      "max": 0.3,
+      "label": "Low Advisory Risk"
+    },
+    "medium": {
+      "min": 0.3,
+      "max": 0.65,
+      "label": "Medium Advisory Risk"
+    },
+    "high": {
+      "min": 0.65,
+      "label": "High Advisory Risk"
+    }
+  }
+}

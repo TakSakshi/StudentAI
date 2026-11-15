@@ -1,0 +1,40 @@
+{
+  "features": [
+    "attendance_rate",
+    "assignment_completion_rate",
+    "previous_score_1",
+    "previous_score_2",
+    "previous_score_3",
+    "average_previous_score",
+    "latest_score",
+    "score_std",
+    "assessments_completed",
+    "min_previous_score",
+    "max_previous_score",
+    "score_delta",
+    "attendance_to_score_ratio",
+    "assignments_completed",
+    "total_assignments",
+    "score_trend"
+  ],
+  "numerical": [
+    "attendance_rate",
+    "assignment_completion_rate",
+    "previous_score_1",
+    "previous_score_2",
+    "previous_score_3",
+    "average_previous_score",
+    "latest_score",
+    "score_std",
+    "assessments_completed",
+    "min_previous_score",
+    "max_previous_score",
+    "score_delta",
+    "attendance_to_score_ratio",
+    "assignments_completed",
+    "total_assignments"
+  ],
+  "categorical": [
+    "score_trend"
+  ]
+}

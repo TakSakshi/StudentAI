@@ -1,0 +1,94 @@
+{
+  "model_name": "Random Forest",
+  "version": "1.0.0",
+  "trained_at": "2026-11-15T13:35:34.168759",
+  "random_seed": 42,
+  "score_threshold_for_at_risk": 40.0,
+  "selected_probability_threshold": 0.6,
+  "default_probability_threshold": 0.5,
+  "training_periods": [
+    1,
+    2,
+    3
+  ],
+  "validation_period": 4,
+  "test_period": 5,
+  "train_samples": 4800,
+  "val_samples": 1600,
+  "test_samples": 1600,
+  "feature_count": 16,
+  "global_feature_importance": [
+    {
+      "feature": "average_previous_score",
+      "importance": 0.1955
+    },
+    {
+      "feature": "latest_score",
+      "importance": 0.1577
+    },
+    {
+      "feature": "previous_score_1",
+      "importance": 0.1524
+    },
+    {
+      "feature": "min_previous_score",
+      "importance": 0.116
+    },
+    {
+      "feature": "previous_score_2",
+      "importance": 0.0772
+    },
+    {
+      "feature": "max_previous_score",
+      "importance": 0.071
+    },
+    {
+      "feature": "assignment_completion_rate",
+      "importance": 0.0572
+    },
+    {
+      "feature": "attendance_rate",
+      "importance": 0.0439
+    },
+    {
+      "feature": "previous_score_3",
+      "importance": 0.0436
+    },
+    {
+      "feature": "attendance_to_score_ratio",
+      "importance": 0.0284
+    },
+    {
+      "feature": "score_std",
+      "importance": 0.0141
+    },
+    {
+      "feature": "assignments_completed",
+      "importance": 0.0139
+    },
+    {
+      "feature": "score_delta",
+      "importance": 0.0135
+    },
+    {
+      "feature": "total_assignments",
+      "importance": 0.0092
+    },
+    {
+      "feature": "assessments_completed",
+      "importance": 0.0036
+    },
+    {
+      "feature": "score_trend_Stable",
+      "importance": 0.0011
+    },
+    {
+      "feature": "score_trend_Declining",
+      "importance": 0.001
+    },
+    {
+      "feature": "score_trend_Improving",
+      "importance": 0.0007
+    }
+  ]
+}
