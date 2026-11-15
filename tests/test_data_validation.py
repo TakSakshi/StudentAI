@@ -47,3 +47,4 @@ def test_missing_values_fails():
 
     with pytest.raises(DataValidationError, match="missing values"):
         validate_dataset(df, strict=True)
+

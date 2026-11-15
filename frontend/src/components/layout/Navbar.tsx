@@ -1,60 +1,65 @@
-import React, { useEffect, useState } from 'react';
-import { ShieldAlert, Cpu, CheckCircle2, AlertTriangle, Menu } from 'lucide-react';
-import { getHealth } from '../../services/api';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+import { Menu, ShieldCheck, Cpu } from 'lucide-react';
 import { HealthStatus } from '../../types';
 
 interface NavbarProps {
   onToggleSidebar: () => void;
+  health: HealthStatus | null;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
-  const [health, setHealth] = useState<HealthStatus | null>(null);
+export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, health }) => {
+  const location = useLocation();
 
-  useEffect(() => {
-    getHealth()
-      .then(setHealth)
-      .catch(() => setHealth(null));
-  }, []);
+  // Route-to-title mapping with editorial styling
+  const pageTitles: Record<string, { title: string; category: string }> = {
+    '/': { title: 'Understanding Student Progress', category: 'Executive Overview' },
+    '/students': { title: 'Student Directory', category: 'Cohort Monitoring' },
+    '/risk-analysis': { title: 'Students Who May Need Support', category: 'Early Warning Intelligence' },
+    '/analytics': { title: 'Academic Progress & Trends', category: 'Longitudinal Analysis' },
+    '/predict': { title: 'Prediction Studio', category: 'Decision Support Workspace' },
+    '/model': { title: 'Model Insights & Empirical Audit', category: 'ML Governance' },
+    '/data': { title: 'Dataset Explorer', category: 'Data Governance' },
+    '/about': { title: 'About & Ethical Guidelines', category: 'Responsible AI' },
+  };
+
+  const current = pageTitles[location.pathname] || {
+    title: 'Student Profile',
+    category: 'Student Analysis',
+  };
 
   return (
-    <header className="h-16 bg-white border-b border-border px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30">
+    <header className="h-18 bg-white/80 backdrop-blur-md border-b border-border px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30">
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleSidebar}
-          className="p-2 rounded-lg text-secondary hover:bg-slate-100 lg:hidden focus:outline-none"
+          className="p-2 rounded-xl text-secondary hover:bg-sage-light hover:text-forest lg:hidden transition-colors"
           aria-label="Toggle Navigation"
         >
           <Menu className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-lg font-bold text-main tracking-tight flex items-center gap-2">
-            StudentInsight <span className="text-primary text-xs font-semibold px-2 py-0.5 bg-primary-light rounded-md">AI</span>
+          <span className="text-[10px] font-bold text-secondary uppercase tracking-widest font-sans">
+            {current.category}
+          </span>
+          <h1 className="font-editorial text-lg sm:text-xl font-bold text-main leading-tight">
+            {current.title}
           </h1>
-          <p className="text-[11px] text-secondary hidden sm:block">Student Performance & At-Risk Prediction</p>
         </div>
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Model Status Pill */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-slate-50 border border-border rounded-full text-xs">
-          <Cpu className="w-3.5 h-3.5 text-primary" />
-          <span className="font-medium text-main">{health?.model_name || 'Random Forest'}</span>
-          <span className="text-secondary">v{health?.model_version || '1.0.0'}</span>
-          {health?.model_loaded ? (
-            <span className="flex items-center gap-1 text-success font-medium">
-              <CheckCircle2 className="w-3 h-3" /> Ready
-            </span>
-          ) : (
-            <span className="flex items-center gap-1 text-amber-600 font-medium">
-              <AlertTriangle className="w-3 h-3" /> Initializing
-            </span>
-          )}
+        {/* Model status tag */}
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-ivory rounded-xl border border-border text-xs text-secondary">
+          <Cpu className="w-3.5 h-3.5 text-forest" />
+          <span className="font-medium text-main font-sans">{health?.model_name || 'Random Forest'}</span>
+          <span className="text-[10px] text-secondary">(&tau; = {health?.decision_threshold ?? 0.60})</span>
         </div>
 
-        {/* Responsible AI Disclaimer Badge */}
-        <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-xs font-medium">
-          <ShieldAlert className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-          <span className="hidden md:inline">Decision Support Only — Human Review Required</span>
+        {/* Human review mandate pill */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-light text-amber-text border border-amber/40 rounded-xl text-xs font-medium">
+          <ShieldCheck className="w-3.5 h-3.5 text-warning shrink-0" />
+          <span className="hidden md:inline">Advisory Support &bull; Human Review Mandated</span>
           <span className="md:hidden">Advisory Only</span>
         </div>
       </div>

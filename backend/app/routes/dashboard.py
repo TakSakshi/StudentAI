@@ -13,3 +13,4 @@ router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
 def get_dashboard_summary():
     """Retrieve comprehensive cohort overview KPI metrics derived from actual data."""
     return AnalyticsService.get_dashboard_summary()
+

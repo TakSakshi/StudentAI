@@ -219,3 +219,4 @@ To illustrate the explainability engine, consider student `STU_0042` processed b
 - **No Automated Grading or Sanctions**: The system is locked to read-only advisory recommendations.
 - **Fairness & Non-Discrimination**: Protected attributes (race, gender, religion, caste, socio-economic status) are strictly excluded from the feature space.
 - **Human in the Loop**: All dashboard views, prediction cards, and detail pages prominently display the human-review mandate.
+

@@ -34,3 +34,4 @@ def get_assignment_analytics():
 def get_risk_distribution():
     """Retrieve overall distribution across Low, Medium, and High advisory risk bands."""
     return AnalyticsService.get_risk_distribution()
+

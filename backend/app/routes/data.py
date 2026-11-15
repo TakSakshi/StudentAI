@@ -52,3 +52,4 @@ def get_data_preview(
         "columns": columns,
         "records": rows
     }
+

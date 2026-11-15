@@ -138,3 +138,4 @@ Interactive ReDoc: `http://localhost:8000/api/redoc`
 - **Method**: `GET`
 - **Path**: `/api/model/metrics`
 - **Response**: Model comparison matrix, held-out test set confusion matrix, global feature importances, and trade-off analysis.
+

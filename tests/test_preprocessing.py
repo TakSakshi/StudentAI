@@ -24,3 +24,4 @@ def test_preprocessing_pipeline_fit_transform():
     assert not np.isinf(X_trans).any(), "Preprocessed matrix should contain no Infs"
     assert X_trans.shape[0] == len(X)
     assert X_trans.shape[1] >= len(X.columns)  # Categorical one-hot expansion
+

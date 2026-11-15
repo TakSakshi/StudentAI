@@ -228,3 +228,4 @@ export interface DataPreviewResponse {
   }[];
   records: Record<string, any>[];
 }
+

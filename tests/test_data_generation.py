@@ -32,3 +32,4 @@ def test_data_generation_schema():
 
     assert len(df) == 300  # 100 students * 3 periods
     assert df["at_risk"].isin([0, 1]).all(), "Target at_risk must only be 0 or 1"
+

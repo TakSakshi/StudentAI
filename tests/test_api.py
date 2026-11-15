@@ -94,3 +94,4 @@ def test_model_metrics_endpoint(client):
     assert len(data["model_comparison"]) >= 4  # baseline, logistic, rf, xgboost, final
     assert "test_metrics" in data
     assert "trade_off_analysis" in data
+

@@ -33,3 +33,4 @@ def test_prediction_output_structure():
     assert isinstance(res["influential_signals"], list)
     assert "human_review_disclaimer" in res
     assert "decision_threshold" in res
+

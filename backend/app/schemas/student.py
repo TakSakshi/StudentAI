@@ -41,3 +41,4 @@ class StudentDetailResponse(BaseModel):
     summary: Dict[str, Any]
     advisory_recommendation: Dict[str, Any]
     human_review_disclaimer: str
+

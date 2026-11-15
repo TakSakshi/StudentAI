@@ -72,3 +72,4 @@ class ModelService:
     @property
     def comparison_data(self) -> List[Dict[str, Any]]:
         return self._comparison_data or []
+

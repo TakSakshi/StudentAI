@@ -74,3 +74,4 @@ def calculate_metrics(
         metrics["brier_score"] = None
 
     return metrics
+

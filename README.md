@@ -349,3 +349,4 @@ print('Narrative:         ', res['explanation_narrative'])
 2. Natural language integration for qualitative teacher notes using privacy-preserving NLP.
 3. Multi-class prediction horizon forecasting (predicting specific grade bands A, B, C, D, F).
 4. Student-facing self-service goal tracking and study habit recommendations.
+

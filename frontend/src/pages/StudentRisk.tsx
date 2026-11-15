@@ -1,18 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
+  ShieldAlert,
   Search,
   Filter,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
+  CheckCircle2,
+  AlertTriangle,
   ArrowRight,
-  ShieldAlert,
-  Download
+  Info,
+  CalendarCheck,
+  BookOpen,
+  TrendingDown
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell
+} from 'recharts';
 
-import { getStudents } from '../services/api';
-import { StudentRecord } from '../types';
+import { getStudents, getRiskDistribution, getAttendanceAnalytics } from '../services/api';
+import { StudentRecord, RiskDistribution, AttendanceAnalytics } from '../types';
 import { RiskBadge } from '../components/common/RiskBadge';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorMessage } from '../components/common/ErrorMessage';
@@ -21,273 +33,286 @@ export const StudentRisk: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [students, setStudents] = useState<StudentRecord[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [riskDist, setRiskDist] = useState<RiskDistribution | null>(null);
+  const [attendance, setAttendance] = useState<AttendanceAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter states from URL or defaults
+  const selectedBand = searchParams.get('band') || 'High';
   const search = searchParams.get('search') || '';
-  const riskBand = searchParams.get('risk_band') || 'ALL';
-  const page = parseInt(searchParams.get('page') || '1', 10);
-  const sortBy = searchParams.get('sort_by') || 'student_id';
-  const ascending = searchParams.get('ascending') !== 'false';
 
-  const fetchRecords = async () => {
+  const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await getStudents({
-        search: search.trim() || undefined,
-        risk_band: riskBand !== 'ALL' ? riskBand : undefined,
-        sort_by: sortBy,
-        ascending: ascending,
-        page: page,
-        page_size: 20
-      });
-      setStudents(res.students);
-      setTotalCount(res.total_count);
-      setTotalPages(res.total_pages);
+      const [stuRes, distRes, attRes] = await Promise.all([
+        getStudents({
+          risk_band: selectedBand !== 'ALL' ? selectedBand : undefined,
+          search: search.trim() || undefined,
+          page_size: 25,
+          sort_by: 'latest_score',
+          ascending: true
+        }),
+        getRiskDistribution(),
+        getAttendanceAnalytics()
+      ]);
+      setStudents(stuRes.students);
+      setRiskDist(distRes);
+      setAttendance(attRes);
     } catch (err: any) {
-      setError(err?.message || 'Failed to retrieve student records.');
+      setError(err?.message || 'Failed to retrieve academic risk analysis.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchRecords();
-  }, [search, riskBand, page, sortBy, ascending]);
+    fetchData();
+  }, [selectedBand, search]);
 
   const updateParam = (key: string, value: string) => {
     const next = new URLSearchParams(searchParams);
-    if (value) {
-      next.set(key, value);
-    } else {
-      next.delete(key);
-    }
-    // Reset to page 1 on filter changes
-    if (key !== 'page') next.set('page', '1');
+    if (value) next.set(key, value);
+    else next.delete(key);
     setSearchParams(next);
   };
 
-  const handleSort = (col: string) => {
-    if (sortBy === col) {
-      updateParam('ascending', (!ascending).toString());
-    } else {
-      const next = new URLSearchParams(searchParams);
-      next.set('sort_by', col);
-      next.set('ascending', 'true');
-      next.set('page', '1');
-      setSearchParams(next);
-    }
-  };
+  if (loading && !riskDist) return <LoadingSpinner message="Evaluating academic vulnerability indicators..." />;
+  if (error && !riskDist) return <ErrorMessage message={error} onRetry={fetchData} />;
+
+  // Chart data for risk distribution
+  const chartBands = riskDist?.bands.map((b) => ({
+    name: b.label.split(' ')[0],
+    fullName: b.label,
+    count: b.count,
+    percentage: b.percentage,
+    color: b.band === 'HIGH' ? '#B94A48' : b.band === 'MEDIUM' ? '#B77B2D' : '#3F7959'
+  })) || [];
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-border shadow-sm">
-        <div>
-          <h2 className="text-xl font-bold text-main">Student Risk Analysis</h2>
-          <p className="text-sm text-secondary mt-1">
-            Searchable cohort directory with automated advisory risk classifications and historical metrics.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 text-xs font-semibold text-secondary">
-          <span className="w-2.5 h-2.5 rounded-full bg-primary"></span>
-          Showing {students.length} of {totalCount} matching students
+    <div className="space-y-8">
+      {/* Editorial Header */}
+      <div className="border-b border-border pb-6">
+        <span className="text-xs font-semibold uppercase tracking-wider text-secondary font-sans block mb-1">
+          Early Warning Intelligence
+        </span>
+        <h1 className="font-editorial text-3xl sm:text-4xl font-bold text-main">
+          Students who may need support
+        </h1>
+        <p className="text-sm text-secondary mt-1.5 max-w-2xl leading-relaxed">
+          Advisory assessments identifying students whose attendance regularity, homework engagement, or recent score trajectory indicate potential benefit from timely educator outreach.
+        </p>
+      </div>
+
+      {/* Methodological Context Panel */}
+      <div className="bg-white rounded-2xl border border-border p-6 shadow-warm-sm">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl bg-sage-light text-forest flex items-center justify-center shrink-0">
+            <Info className="w-5 h-5" />
+          </div>
+          <div className="space-y-1.5 text-xs text-secondary leading-relaxed">
+            <h3 className="font-editorial text-base font-bold text-main">
+              How Advisory Support Bands Are Derived
+            </h3>
+            <p>
+              Predictions are generated by a trained Random Forest model evaluating student records strictly prior to each assessment cutoff. Calibrated vulnerability probabilities (P(at risk)) are mapped into three documented pedagogical categories:
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+              <div className="p-3 rounded-xl bg-sage-light/60 border border-sage">
+                <span className="font-bold text-forest block">Steady Progress (P &lt; 30%)</span>
+                <span className="text-[11px] text-secondary mt-0.5 block">Consistent attendance and steady test marks.</span>
+              </div>
+              <div className="p-3 rounded-xl bg-amber-light/70 border border-amber/40">
+                <span className="font-bold text-amber-text block">Check-in Advised (30% &le; P &lt; 65%)</span>
+                <span className="text-[11px] text-secondary mt-0.5 block">Minor dips in formative submissions or attendance.</span>
+              </div>
+              <div className="p-3 rounded-xl bg-softred-light/70 border border-softred">
+                <span className="font-bold text-softred-text block">Priority Support (P &ge; 65%)</span>
+                <span className="text-[11px] text-secondary mt-0.5 block">Downward momentum or low attendance requiring review.</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-border shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
-        <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-secondary absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search by Student ID (e.g. STU_0042)..."
-            value={search}
-            onChange={(e) => updateParam('search', e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-border rounded-xl text-xs text-main placeholder-secondary focus:outline-none focus:border-primary focus:bg-white transition-colors"
-          />
-        </div>
-
-        {/* Risk Band Quick Filters */}
-        <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-          <span className="text-xs text-secondary font-medium mr-1 flex items-center gap-1">
-            <Filter className="w-3.5 h-3.5" /> Risk:
-          </span>
-          {['ALL', 'High', 'Medium', 'Low'].map((band) => (
-            <button
-              key={band}
-              onClick={() => updateParam('risk_band', band)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                riskBand.toUpperCase() === band.toUpperCase()
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'bg-slate-50 text-secondary hover:bg-slate-100 hover:text-main'
-              }`}
-            >
-              {band === 'ALL' ? 'All Bands' : `${band} Risk`}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Table */}
-      <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
-        {loading ? (
-          <LoadingSpinner message="Filtering student records..." />
-        ) : error ? (
-          <ErrorMessage message={error} onRetry={fetchRecords} />
-        ) : students.length === 0 ? (
-          <div className="p-12 text-center text-secondary">
-            <p className="text-sm font-medium">No students match the current search or risk filters.</p>
-            <button
-              onClick={() => setSearchParams({})}
-              className="mt-3 text-xs text-primary font-semibold hover:underline"
-            >
-              Reset all filters
-            </button>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border bg-slate-50/70 text-[11px] font-bold text-secondary uppercase tracking-wider select-none">
-                  <th
-                    className="py-3 px-4 cursor-pointer hover:text-main"
-                    onClick={() => handleSort('student_id')}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      Student ID <ArrowUpDown className="w-3 h-3 opacity-60" />
-                    </div>
-                  </th>
-                  <th
-                    className="py-3 px-4 cursor-pointer hover:text-main"
-                    onClick={() => handleSort('latest_score')}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      Latest Score <ArrowUpDown className="w-3 h-3 opacity-60" />
-                    </div>
-                  </th>
-                  <th
-                    className="py-3 px-4 cursor-pointer hover:text-main"
-                    onClick={() => handleSort('average_previous_score')}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      Historical Avg <ArrowUpDown className="w-3 h-3 opacity-60" />
-                    </div>
-                  </th>
-                  <th
-                    className="py-3 px-4 cursor-pointer hover:text-main"
-                    onClick={() => handleSort('attendance_rate')}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      Attendance <ArrowUpDown className="w-3 h-3 opacity-60" />
-                    </div>
-                  </th>
-                  <th
-                    className="py-3 px-4 cursor-pointer hover:text-main"
-                    onClick={() => handleSort('assignment_completion_rate')}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      Completion Rate <ArrowUpDown className="w-3 h-3 opacity-60" />
-                    </div>
-                  </th>
-                  <th className="py-3 px-4">Score Trend</th>
-                  <th className="py-3 px-4">Advisory Risk</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border text-xs">
-                {students.map((s) => (
-                  <tr key={`${s.student_id}-${s.assessment_period}`} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4 font-semibold text-main">
-                      <Link
-                        to={`/students/${s.student_id}`}
-                        className="text-primary hover:underline hover:text-primary-hover"
-                      >
-                        {s.student_id}
-                      </Link>
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-main">
-                      <span className={s.latest_score < 40 ? 'text-danger' : s.latest_score >= 70 ? 'text-success' : 'text-main'}>
-                        {s.latest_score}%
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-secondary">{s.average_previous_score}%</td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${
-                              s.attendance_rate < 70 ? 'bg-danger' : s.attendance_rate >= 85 ? 'bg-success' : 'bg-amber-500'
-                            }`}
-                            style={{ width: `${Math.min(100, s.attendance_rate)}%` }}
-                          />
-                        </div>
-                        <span className="text-[11px] font-medium">{s.attendance_rate}%</span>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="text-secondary">{s.assignment_completion_rate}%</span>
-                      <span className="text-[10px] text-slate-400 block">({s.assignments_completed}/{s.total_assignments})</span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${
-                        s.score_trend === 'Declining'
-                          ? 'bg-red-50 text-red-700'
-                          : s.score_trend === 'Improving'
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-slate-100 text-slate-700'
-                      }`}>
-                        {s.score_trend}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <RiskBadge band={s.advisory_risk_band} size="sm" />
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <Link
-                        to={`/students/${s.student_id}`}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-primary bg-primary-light hover:bg-blue-100 rounded-md transition-colors"
-                      >
-                        Inspect <ArrowRight className="w-3 h-3" />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Pagination Bar */}
-        <div className="p-4 border-t border-border bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-secondary">
+      {/* Cohort Distribution & Academic Insights Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Support Distribution Bar Chart (5 Cols) */}
+        <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-border shadow-warm-sm flex flex-col justify-between">
           <div>
-            Page <span className="font-semibold text-main">{page}</span> of{' '}
-            <span className="font-semibold text-main">{totalPages}</span>
+            <h3 className="font-editorial text-lg font-bold text-main">Cohort Risk Stratification</h3>
+            <p className="text-xs text-secondary mt-0.5">Total student evaluations distributed across advisory bands</p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => updateParam('page', (page - 1).toString())}
-              disabled={page <= 1}
-              className="p-1.5 rounded-lg border border-border bg-white text-main hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="px-3 py-1 font-medium bg-white border border-border rounded-lg text-main">
-              {page}
-            </span>
-            <button
-              onClick={() => updateParam('page', (page + 1).toString())}
-              disabled={page >= totalPages}
-              className="p-1.5 rounded-lg border border-border bg-white text-main hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+          <div className="h-60 w-full my-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartBands} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E6DD" vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#738078' }} axisLine={{ stroke: '#E5E6DD' }} />
+                <YAxis tick={{ fontSize: 11, fill: '#738078' }} axisLine={{ stroke: '#E5E6DD' }} />
+                <Tooltip
+                  formatter={(val: number) => [`${val.toLocaleString()} records`, 'Total']}
+                  contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E5E6DD', borderRadius: '8px', fontSize: '12px' }}
+                />
+                <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                  {chartBands.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
+
+          <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border text-center text-xs">
+            {chartBands.map((b) => (
+              <div key={b.name}>
+                <span className="font-bold block" style={{ color: b.color }}>{b.percentage}%</span>
+                <span className="text-[10px] text-secondary block">{b.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Signal Comparison Card (7 Cols) */}
+        <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-border shadow-warm-sm flex flex-col justify-between">
+          <div>
+            <h3 className="font-editorial text-lg font-bold text-main">Key Academic Vulnerability Signals</h3>
+            <p className="text-xs text-secondary mt-0.5">Empirical patterns distinguishing students needing support from steady learners</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
+            <div className="p-4 bg-ivory rounded-xl border border-border">
+              <CalendarCheck className="w-5 h-5 text-forest mb-2" />
+              <div className="text-xs font-bold text-main">Attendance Deficit</div>
+              <p className="text-[11px] text-secondary mt-1 leading-relaxed">
+                Students attending &lt; 70% of classes account for <strong>68% of all high-risk flags</strong>.
+              </p>
+            </div>
+
+            <div className="p-4 bg-ivory rounded-xl border border-border">
+              <BookOpen className="w-5 h-5 text-forest mb-2" />
+              <div className="text-xs font-bold text-main">Missed Formative HW</div>
+              <p className="text-[11px] text-secondary mt-1 leading-relaxed">
+                Incomplete assignments eliminate key conceptual practice before exams.
+              </p>
+            </div>
+
+            <div className="p-4 bg-ivory rounded-xl border border-border">
+              <TrendingDown className="w-5 h-5 text-forest mb-2" />
+              <div className="text-xs font-bold text-main">Declining Trajectory</div>
+              <p className="text-[11px] text-secondary mt-1 leading-relaxed">
+                Consecutive score drops (&gt; 3 pts) double the probability of next-exam failure.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3 bg-sage-light text-forest rounded-xl text-xs border border-sage flex items-center justify-between">
+            <span>Every advisory flag is an opportunity for proactive academic coaching.</span>
+            <Link to="/predict" className="font-bold hover:underline flex items-center gap-1 shrink-0 ml-2">
+              Test Student in Studio <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Filterable Student Review Table */}
+      <div className="bg-white rounded-2xl border border-border shadow-warm-sm p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+          <div>
+            <h3 className="font-editorial text-lg font-bold text-main">Support Review Roster</h3>
+            <p className="text-xs text-secondary mt-0.5">
+              Showing students filtered by advisory category to assist academic advisors with outreach planning.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { key: 'High', label: 'Priority Support' },
+              { key: 'Medium', label: 'Check-in Advised' },
+              { key: 'Low', label: 'Steady Progress' },
+              { key: 'ALL', label: 'All Students' }
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => updateParam('band', tab.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  selectedBand.toUpperCase() === tab.key.toUpperCase()
+                    ? 'bg-forest text-white shadow-warm-sm'
+                    : 'bg-ivory text-secondary hover:bg-sage-light hover:text-forest'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="border-b border-border bg-ivory text-[11px] font-semibold text-secondary uppercase tracking-wider">
+                <th className="py-3 px-4">Student Ref</th>
+                <th className="py-3 px-4">Latest Mark</th>
+                <th className="py-3 px-4">Historical Mean</th>
+                <th className="py-3 px-4">Attendance</th>
+                <th className="py-3 px-4">HW Submissions</th>
+                <th className="py-3 px-4">Score Momentum</th>
+                <th className="py-3 px-4">Advisory Category</th>
+                <th className="py-3 px-4 text-right">Pedagogical Review</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/60">
+              {students.map((s, idx) => (
+                <tr
+                  key={`${s.student_id}-${s.assessment_period}`}
+                  className={`transition-colors ${idx % 2 === 1 ? 'bg-ivory/30' : 'bg-white'} hover:bg-sage-light/40`}
+                >
+                  <td className="py-3.5 px-4 font-bold text-main font-mono">
+                    <Link to={`/students/${s.student_id}`} className="text-forest hover:underline">
+                      {s.student_id}
+                    </Link>
+                  </td>
+                  <td className="py-3.5 px-4 font-bold text-main font-sans">
+                    <span className={s.latest_score < 40 ? 'text-danger' : s.latest_score >= 70 ? 'text-forest' : 'text-main'}>
+                      {s.latest_score}%
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-secondary font-sans">{s.average_previous_score}%</td>
+                  <td className="py-3.5 px-4 font-sans">
+                    <span className={s.attendance_rate < 70 ? 'text-danger font-medium' : 'text-main'}>
+                      {s.attendance_rate}%
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4">
+                    <span>{s.assignment_completion_rate}%</span>
+                    <span className="text-[10px] text-secondary ml-1">({s.assignments_completed}/{s.total_assignments})</span>
+                  </td>
+                  <td className="py-3.5 px-4">
+                    <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${
+                      s.score_trend === 'Declining'
+                        ? 'bg-softred-light text-softred-text'
+                        : s.score_trend === 'Improving'
+                        ? 'bg-sage-light text-forest'
+                        : 'bg-ivory text-secondary'
+                    }`}>
+                      {s.score_trend}
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4">
+                    <RiskBadge band={s.advisory_risk_band} size="sm" supportive={true} />
+                  </td>
+                  <td className="py-3.5 px-4 text-right">
+                    <Link
+                      to={`/students/${s.student_id}`}
+                      className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-forest bg-sage-light hover:bg-sage rounded-lg transition-colors"
+                    >
+                      Consult <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

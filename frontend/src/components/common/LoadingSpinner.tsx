@@ -5,11 +5,13 @@ interface LoadingSpinnerProps {
   message?: string;
 }
 
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ message = 'Loading academic records...' }) => {
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  message = 'Retrieving academic indicators...'
+}) => {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-secondary">
-      <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      <span className="mt-3 text-sm font-medium">{message}</span>
+    <div className="flex flex-col items-center justify-center py-20 text-secondary">
+      <Loader2 className="w-8 h-8 animate-spin text-forest" />
+      <span className="mt-3 text-xs font-medium tracking-wide text-secondary">{message}</span>
     </div>
   );
 };

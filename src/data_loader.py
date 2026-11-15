@@ -51,3 +51,4 @@ def load_data(file_path: Union[str, Path] = PROCESSED_DATA_PATH) -> pd.DataFrame
         df["at_risk"] = df["at_risk"].astype(int)
 
     return df
+

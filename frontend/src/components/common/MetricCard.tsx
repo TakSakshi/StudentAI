@@ -7,7 +7,8 @@ interface MetricCardProps {
   subtitle?: string;
   icon: LucideIcon;
   badge?: string;
-  badgeType?: 'success' | 'warning' | 'danger' | 'info';
+  badgeType?: 'sage' | 'amber' | 'softred' | 'lavender';
+  trend?: string;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -16,32 +17,40 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   subtitle,
   icon: Icon,
   badge,
-  badgeType = 'info'
+  badgeType = 'sage',
+  trend
 }) => {
-  const badgeStyles = {
-    success: 'bg-green-50 text-green-700 border-green-200',
-    warning: 'bg-amber-50 text-amber-700 border-amber-200',
-    danger: 'bg-red-50 text-red-700 border-red-200',
-    info: 'bg-blue-50 text-blue-700 border-blue-200',
+  const badgeClasses = {
+    sage: 'bg-sage-light text-forest border-sage',
+    amber: 'bg-amber-light text-amber-text border-amber/40',
+    softred: 'bg-softred-light text-softred-text border-softred/60',
+    lavender: 'bg-lavender-light text-lavender-text border-lavender',
   };
 
   return (
-    <div className="bg-white rounded-xl p-5 border border-border shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-secondary uppercase tracking-wider">{title}</span>
-        <div className="w-9 h-9 rounded-lg bg-primary-light flex items-center justify-center text-primary">
-          <Icon className="w-5 h-5" />
+    <div className="bg-white rounded-xl p-5 border border-border shadow-warm-sm hover:shadow-warm transition-all flex flex-col justify-between">
+      <div className="flex items-start justify-between gap-3">
+        <span className="text-xs font-medium text-secondary uppercase tracking-wider">{title}</span>
+        <div className="w-8 h-8 rounded-lg bg-sage-light text-forest flex items-center justify-center shrink-0">
+          <Icon className="w-4 h-4" />
         </div>
       </div>
-      <div className="mt-3 flex items-baseline justify-between">
-        <span className="text-2xl font-bold text-main">{value}</span>
+
+      <div className="mt-3 flex items-baseline justify-between gap-2">
+        <span className="text-2xl font-bold text-main font-sans tracking-tight">{value}</span>
         {badge && (
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${badgeStyles[badgeType]}`}>
+          <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border ${badgeClasses[badgeType]}`}>
             {badge}
           </span>
         )}
       </div>
-      {subtitle && <p className="mt-1 text-xs text-secondary">{subtitle}</p>}
+
+      {(subtitle || trend) && (
+        <div className="mt-2 pt-2 border-t border-border/60 flex items-center justify-between text-[11px] text-secondary">
+          {subtitle && <span>{subtitle}</span>}
+          {trend && <span className="font-medium text-forest">{trend}</span>}
+        </div>
+      )}
     </div>
   );
 };

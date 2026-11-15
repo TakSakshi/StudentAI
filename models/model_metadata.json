@@ -1,7 +1,7 @@
 {
   "model_name": "Random Forest",
   "version": "1.0.0",
-  "trained_at": "2026-11-15T13:35:34.168759",
+  "trained_at": "2026-11-15T13:45:41.532389",
   "random_seed": 42,
   "score_threshold_for_at_risk": 40.0,
   "selected_probability_threshold": 0.6,

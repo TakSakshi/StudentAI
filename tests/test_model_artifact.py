@@ -44,3 +44,4 @@ def test_metrics_consistency():
     assert "confusion_matrix" in test_m
     assert 0.0 <= test_m["recall"] <= 1.0
     assert 0.0 <= test_m["precision"] <= 1.0
+

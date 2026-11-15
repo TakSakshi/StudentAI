@@ -72,3 +72,4 @@ def test_feature_matrix_excludes_target():
     assert "next_assessment_score" not in X.columns
     assert list(X.columns) == ALL_MODEL_FEATURES
     assert y.iloc[0] == 0
+

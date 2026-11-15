@@ -2,16 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
-  Calendar,
-  BookOpen,
-  CalendarCheck,
+  GraduationCap,
+  Sparkles,
   TrendingDown,
   TrendingUp,
-  AlertCircle,
-  CheckCircle2,
   ShieldAlert,
-  GraduationCap,
-  Sparkles
+  CalendarCheck,
+  BookOpen,
+  Award,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  HelpCircle
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -46,7 +48,6 @@ export const StudentDetails: React.FC = () => {
       const data = await getStudentDetail(studentId);
       setDetail(data);
 
-      // Trigger live inference for this student's latest state
       const pred = await predictRisk({
         student_id: data.student_id,
         attendance_rate: data.latest_record.attendance_rate,
@@ -60,7 +61,7 @@ export const StudentDetails: React.FC = () => {
       });
       setLivePrediction(pred);
     } catch (err: any) {
-      setError(err?.message || `Failed to load details for ${studentId}`);
+      setError(err?.message || `Failed to retrieve records for ${studentId}`);
     } finally {
       setLoading(false);
     }
@@ -70,12 +71,11 @@ export const StudentDetails: React.FC = () => {
     fetchStudentData();
   }, [studentId]);
 
-  if (loading) return <LoadingSpinner message={`Loading academic trajectory for ${studentId}...`} />;
+  if (loading) return <LoadingSpinner message={`Loading academic record for ${studentId}...`} />;
   if (error || !detail) return <ErrorMessage message={error || 'Student not found.'} onRetry={fetchStudentData} />;
 
   const latest = detail.latest_record;
 
-  // Chart trajectory data across historical periods
   const trajectoryData = detail.history.map((h) => ({
     period: `Period ${h.assessment_period}`,
     score: h.latest_score,
@@ -84,53 +84,53 @@ export const StudentDetails: React.FC = () => {
   }));
 
   return (
-    <div className="space-y-6">
-      {/* Navigation & Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-8 max-w-5xl mx-auto">
+      {/* Breadcrumb Navigation */}
+      <div className="flex items-center justify-between">
         <Link
           to="/students"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-secondary hover:text-main"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-secondary hover:text-forest transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Student List
+          Back to Student Directory
         </Link>
-        <div className="flex items-center gap-2 text-xs text-secondary">
-          <span>Student ID:</span>
-          <span className="font-mono font-bold text-main bg-white px-2 py-1 rounded border border-border">
-            {detail.student_id}
-          </span>
-        </div>
+        <span className="text-xs text-secondary">
+          Academic Progress Record &bull; Anonymous Reference <strong className="font-mono text-main">{detail.student_id}</strong>
+        </span>
       </div>
 
-      {/* Profile Overview Card */}
-      <div className="bg-white p-6 rounded-2xl border border-border shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-primary-light flex items-center justify-center text-primary font-bold text-lg">
+      {/* Student Academic Identity Card */}
+      <div className="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-warm-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-start gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-sage-light text-forest flex items-center justify-center font-bold shrink-0">
             <GraduationCap className="w-7 h-7" />
           </div>
           <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-bold text-main">{detail.student_id}</h2>
-              <RiskBadge band={livePrediction?.advisory_risk_band || latest.advisory_risk_band} size="md" />
+            <div className="flex items-center gap-3 flex-wrap">
+              <h2 className="font-editorial text-2xl font-bold text-main">{detail.student_id}</h2>
+              <RiskBadge
+                band={livePrediction?.advisory_risk_band || latest.advisory_risk_band}
+                size="md"
+                supportive={true}
+              />
             </div>
             <p className="text-xs text-secondary mt-1">
-              Tracked across {detail.summary.total_periods_tracked} assessment periods &bull; Latest cutoff:{' '}
+              Active student across {detail.summary.total_periods_tracked} assessment periods &bull; Latest evaluation:{' '}
               {latest.prediction_date}
             </p>
           </div>
         </div>
 
-        {/* Live Model Risk Score Meter */}
+        {/* Live Advisory Vulnerability Meter */}
         {livePrediction && (
-          <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-border w-full md:w-auto">
-            <div>
-              <div className="text-[11px] text-secondary font-medium uppercase tracking-wider">Model Probability</div>
-              <div className="text-2xl font-bold" style={{ color: livePrediction.risk_band_color }}>
-                {livePrediction.risk_percentage}%
-              </div>
-              <div className="text-[10px] text-secondary">Decision Threshold: {livePrediction.decision_threshold}</div>
+          <div className="p-4 bg-ivory rounded-xl border border-border shrink-0 min-w-[220px]">
+            <div className="text-[11px] font-medium text-secondary uppercase tracking-wider">
+              Advisory Vulnerability
             </div>
-            <div className="w-24 bg-slate-200 rounded-full h-2.5 overflow-hidden">
+            <div className="text-2xl font-bold font-sans mt-0.5" style={{ color: livePrediction.risk_band_color }}>
+              {livePrediction.risk_percentage}%
+            </div>
+            <div className="w-full bg-border/60 rounded-full h-2 mt-2 overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
@@ -139,142 +139,163 @@ export const StudentDetails: React.FC = () => {
                 }}
               />
             </div>
+            <div className="text-[10px] text-secondary mt-1.5 flex justify-between">
+              <span>Threshold: {livePrediction.decision_threshold}</span>
+              <span>Model: {livePrediction.model_name}</span>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Human Review Advisory Banner */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-        <ShieldAlert className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-        <div className="text-xs text-amber-900 leading-relaxed">
-          <span className="font-bold">Human Review Mandate:</span> {detail.human_review_disclaimer}
+      {/* Human Review Reminder Banner */}
+      <div className="bg-amber-light border border-amber/40 rounded-xl p-4 flex items-start gap-3">
+        <ShieldAlert className="w-5 h-5 text-amber-text shrink-0 mt-0.5" />
+        <div className="text-xs text-amber-text leading-relaxed">
+          <span className="font-bold">Human Review Required:</span> {detail.human_review_disclaimer}
         </div>
       </div>
 
-      {/* Key Academic Metrics Grid */}
+      {/* Summary Academic Scorecards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-border shadow-sm">
-          <div className="text-[11px] text-secondary font-medium uppercase">Latest Assessment</div>
-          <div className="text-2xl font-bold text-main mt-1">{latest.latest_score}%</div>
-          <div className="text-[11px] text-secondary mt-1">Historical Avg: {latest.average_previous_score}%</div>
+        <div className="bg-white p-4 rounded-xl border border-border shadow-warm-sm">
+          <span className="text-[11px] font-medium text-secondary uppercase block">Latest Assessment</span>
+          <span className="text-2xl font-bold text-main font-sans mt-1 block">{latest.latest_score}%</span>
+          <span className="text-[11px] text-secondary mt-1 block">Mean: {detail.summary.historical_mean_score}%</span>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-border shadow-sm">
-          <div className="text-[11px] text-secondary font-medium uppercase">Class Attendance</div>
-          <div className={`text-2xl font-bold mt-1 ${latest.attendance_rate < 70 ? 'text-danger' : 'text-main'}`}>
+        <div className="bg-white p-4 rounded-xl border border-border shadow-warm-sm">
+          <span className="text-[11px] font-medium text-secondary uppercase block">Class Attendance</span>
+          <span className={`text-2xl font-bold font-sans mt-1 block ${latest.attendance_rate < 70 ? 'text-danger' : 'text-main'}`}>
             {latest.attendance_rate}%
-          </div>
-          <div className="text-[11px] text-secondary mt-1">Target: 80.0%+</div>
+          </span>
+          <span className="text-[11px] text-secondary mt-1 block">Hist Mean: {detail.summary.historical_mean_attendance}%</span>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-border shadow-sm">
-          <div className="text-[11px] text-secondary font-medium uppercase">Assignments Completed</div>
-          <div className="text-2xl font-bold text-main mt-1">
-            {latest.assignments_completed}/{latest.total_assignments}
-          </div>
-          <div className="text-[11px] text-secondary mt-1">{latest.assignment_completion_rate}% completion</div>
+        <div className="bg-white p-4 rounded-xl border border-border shadow-warm-sm">
+          <span className="text-[11px] font-medium text-secondary uppercase block">Homework Diligence</span>
+          <span className="text-2xl font-bold text-main font-sans mt-1 block">
+            {latest.assignment_completion_rate}%
+          </span>
+          <span className="text-[11px] text-secondary mt-1 block">{latest.assignments_completed} of {latest.total_assignments} completed</span>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-border shadow-sm">
-          <div className="text-[11px] text-secondary font-medium uppercase">Performance Trend</div>
-          <div className="text-lg font-bold text-main mt-1.5 flex items-center gap-1.5">
+        <div className="bg-white p-4 rounded-xl border border-border shadow-warm-sm">
+          <span className="text-[11px] font-medium text-secondary uppercase block">Recent Momentum</span>
+          <span className="text-lg font-bold text-main font-sans mt-1.5 flex items-center gap-1.5">
             {latest.score_trend === 'Improving' ? (
-              <span className="text-success flex items-center gap-1"><TrendingUp className="w-4 h-4" /> Improving</span>
+              <span className="text-forest flex items-center gap-1"><TrendingUp className="w-4 h-4" /> Improving</span>
             ) : latest.score_trend === 'Declining' ? (
               <span className="text-danger flex items-center gap-1"><TrendingDown className="w-4 h-4" /> Declining</span>
             ) : (
               <span className="text-secondary">Stable</span>
             )}
-          </div>
-          <div className="text-[11px] text-secondary mt-1">Std Dev: {latest.score_std}</div>
+          </span>
+          <span className="text-[11px] text-secondary mt-1 block">Range: {detail.summary.min_recorded_score}% - {detail.summary.max_recorded_score}%</span>
         </div>
       </div>
 
-      {/* Trajectory Chart & Influential Signals */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Longitudinal History Chart */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-border shadow-sm">
-          <h3 className="text-sm font-bold text-main mb-1">Longitudinal Academic Trajectory</h3>
-          <p className="text-xs text-secondary mb-4">Historical score progression and attendance across periods</p>
+      {/* Trajectory & Academic Signals */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Longitudinal Trajectory Chart (7 Cols) */}
+        <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-border shadow-warm-sm">
+          <h3 className="font-editorial text-lg font-bold text-main mb-1">
+            Historical Academic Trajectory
+          </h3>
+          <p className="text-xs text-secondary mb-4">
+            Longitudinal progression of exam scores and engagement signals across periods
+          </p>
 
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trajectoryData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                <XAxis dataKey="period" tick={{ fontSize: 11, fill: '#64748B' }} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#64748B' }} />
+              <LineChart data={trajectoryData} margin={{ top: 10, right: 15, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E6DD" vertical={false} />
+                <XAxis dataKey="period" tick={{ fontSize: 11, fill: '#738078' }} axisLine={{ stroke: '#E5E6DD' }} />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#738078' }} axisLine={{ stroke: '#E5E6DD' }} />
                 <Tooltip
                   formatter={(val: number) => [`${val}%`]}
-                  contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E5EAF1', borderRadius: '8px', fontSize: '12px' }}
+                  contentStyle={{
+                    backgroundColor: '#FFFFFF',
+                    borderColor: '#E5E6DD',
+                    borderRadius: '8px',
+                    fontSize: '12px'
+                  }}
                 />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
                 <Line
                   type="monotone"
                   dataKey="score"
-                  name="Assessment Score (%)"
-                  stroke="#2563EB"
+                  name="Assessment Mark (%)"
+                  stroke="#244C3C"
                   strokeWidth={2.5}
-                  dot={{ r: 4 }}
+                  dot={{ r: 4, fill: '#244C3C' }}
                 />
                 <Line
                   type="monotone"
                   dataKey="attendance"
                   name="Attendance (%)"
-                  stroke="#16A34A"
+                  stroke="#3F7959"
                   strokeWidth={2}
                   strokeDasharray="4 4"
                 />
                 <Line
                   type="monotone"
                   dataKey="completion"
-                  name="Assignment Completion (%)"
-                  stroke="#D97706"
+                  name="HW Completion (%)"
+                  stroke="#B77B2D"
                   strokeWidth={1.5}
-                  dot={{ r: 3 }}
+                  dot={{ r: 3, fill: '#B77B2D' }}
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Influential Academic Signals & Recommended Action */}
-        <div className="bg-white p-6 rounded-2xl border border-border shadow-sm flex flex-col">
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-bold text-main">Explainable Model Signals</h3>
-          </div>
-          <p className="text-xs text-secondary mb-4">Specific academic drivers detected before cutoff</p>
-
-          {livePrediction?.influential_signals && livePrediction.influential_signals.length > 0 ? (
-            <div className="space-y-3 flex-1">
-              {livePrediction.influential_signals.map((sig, idx) => (
-                <div
-                  key={idx}
-                  className={`p-3 rounded-xl border text-xs ${
-                    sig.impact === 'Increases Risk'
-                      ? 'bg-red-50/50 border-red-200 text-red-900'
-                      : 'bg-green-50/50 border-green-200 text-green-900'
-                  }`}
-                >
-                  <div className="flex items-center justify-between font-semibold">
-                    <span>{sig.signal}</span>
-                    <span className="text-[10px] uppercase tracking-wider">{sig.importance}</span>
-                  </div>
-                  <p className="mt-1 text-[11px] opacity-80 leading-relaxed">{sig.detail}</p>
-                </div>
-              ))}
+        {/* Academic Signals to Review (5 Cols) */}
+        <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-border shadow-warm-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles className="w-4 h-4 text-forest" />
+              <h3 className="font-editorial text-lg font-bold text-main">
+                Academic signals to review
+              </h3>
             </div>
-          ) : (
-            <p className="text-xs text-secondary italic">No critical anomalies flagged.</p>
-          )}
+            <p className="text-xs text-secondary mb-4">
+              Observable indicators influencing the model's advisory estimation (correlations, not diagnoses)
+            </p>
+
+            <div className="space-y-3">
+              {livePrediction?.influential_signals && livePrediction.influential_signals.length > 0 ? (
+                livePrediction.influential_signals.map((sig, idx) => (
+                  <div
+                    key={idx}
+                    className={`p-3 rounded-xl border text-xs ${
+                      sig.impact === 'Increases Risk'
+                        ? 'bg-softred-light border-softred/60 text-softred-text'
+                        : 'bg-sage-light border-sage text-forest'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between font-semibold">
+                      <span>{sig.signal}</span>
+                      <span className="text-[10px] uppercase tracking-wider opacity-80">{sig.importance}</span>
+                    </div>
+                    <p className="mt-1 text-[11px] opacity-90 leading-relaxed">{sig.detail}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 bg-ivory rounded-xl text-xs text-secondary text-center">
+                  No atypical performance flags detected for this student.
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Action Recommendation */}
-          <div className="mt-4 pt-4 border-t border-border bg-slate-50 -mx-6 -mb-6 p-6 rounded-b-2xl">
-            <div className="text-xs font-bold text-main">Recommended Educator Action</div>
-            <div className="mt-1 text-xs text-primary font-medium">
+          <div className="mt-4 pt-4 border-t border-border bg-ivory -mx-6 -mb-6 p-6 rounded-b-2xl">
+            <div className="text-xs font-bold text-main uppercase tracking-wider">Suggested Pedagogical Follow-up</div>
+            <div className="mt-1 text-xs text-forest font-semibold">
               {detail.advisory_recommendation.suggested_action}
             </div>
             <ul className="mt-2 space-y-1">
               {detail.advisory_recommendation.focus_areas.map((fa, i) => (
                 <li key={i} className="text-[11px] text-secondary flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3 h-3 text-primary shrink-0" /> {fa}
+                  <CheckCircle2 className="w-3 h-3 text-forest shrink-0" /> {fa}
                 </li>
               ))}
             </ul>
@@ -282,42 +303,44 @@ export const StudentDetails: React.FC = () => {
         </div>
       </div>
 
-      {/* Historical Assessment Periods Table */}
-      <div className="bg-white rounded-2xl border border-border shadow-sm p-6">
-        <h3 className="text-sm font-bold text-main mb-3">Historical Assessment Records</h3>
+      {/* Historical Record Table */}
+      <div className="bg-white rounded-2xl border border-border p-6 shadow-warm-sm">
+        <h3 className="font-editorial text-lg font-bold text-main mb-3">
+          Historical Assessment Periods
+        </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-border bg-slate-50 text-[11px] font-bold text-secondary uppercase tracking-wider">
+              <tr className="border-b border-border bg-ivory text-[11px] font-semibold text-secondary uppercase tracking-wider">
                 <th className="py-2.5 px-3">Period</th>
-                <th className="py-2.5 px-3">Cutoff Date</th>
+                <th className="py-2.5 px-3">Evaluation Date</th>
                 <th className="py-2.5 px-3">Score at Cutoff</th>
                 <th className="py-2.5 px-3">Historical Avg</th>
                 <th className="py-2.5 px-3">Attendance</th>
-                <th className="py-2.5 px-3">Assignments</th>
-                <th className="py-2.5 px-3">Trend</th>
-                <th className="py-2.5 px-3">Next Exam Outcome</th>
+                <th className="py-2.5 px-3">Formative HW</th>
+                <th className="py-2.5 px-3">Momentum</th>
+                <th className="py-2.5 px-3">Target Exam Result</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border/60">
               {detail.history.map((h) => (
-                <tr key={h.assessment_period} className="hover:bg-slate-50/70">
+                <tr key={h.assessment_period} className="hover:bg-ivory/60">
                   <td className="py-2.5 px-3 font-semibold text-main">Period {h.assessment_period}</td>
                   <td className="py-2.5 px-3 text-secondary">{h.prediction_date}</td>
-                  <td className="py-2.5 px-3 font-bold text-main">{h.latest_score}%</td>
-                  <td className="py-2.5 px-3 text-secondary">{h.average_previous_score}%</td>
-                  <td className="py-2.5 px-3">{h.attendance_rate}%</td>
+                  <td className="py-2.5 px-3 font-bold text-main font-sans">{h.latest_score}%</td>
+                  <td className="py-2.5 px-3 text-secondary font-sans">{h.average_previous_score}%</td>
+                  <td className="py-2.5 px-3 font-sans">{h.attendance_rate}%</td>
                   <td className="py-2.5 px-3">
                     {h.assignments_completed}/{h.total_assignments} ({h.assignment_completion_rate}%)
                   </td>
                   <td className="py-2.5 px-3">{h.score_trend}</td>
                   <td className="py-2.5 px-3">
                     {h.next_assessment_score != null ? (
-                      <span className={h.next_assessment_score < 40 ? 'text-danger font-semibold' : 'text-success font-semibold'}>
-                        {h.next_assessment_score}% ({h.at_risk === 1 ? 'At-Risk' : 'Safe'})
+                      <span className={h.next_assessment_score < 40 ? 'text-danger font-semibold' : 'text-forest font-semibold'}>
+                        {h.next_assessment_score}% ({h.at_risk === 1 ? 'Under 40%' : 'Passed'})
                       </span>
                     ) : (
-                      <span className="text-slate-400">Pending</span>
+                      <span className="text-secondary italic">Upcoming</span>
                     )}
                   </td>
                 </tr>

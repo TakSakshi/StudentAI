@@ -23,3 +23,4 @@ def check_health():
         "model_version": model_svc.version,
         "decision_threshold": model_svc.threshold
     }
+

@@ -60,3 +60,4 @@ class RiskBandCount(BaseModel):
 class RiskDistributionResponse(BaseModel):
     total_students: int
     bands: List[RiskBandCount]
+

@@ -41,3 +41,4 @@ def get_student_details(student_id: str):
     if not result:
         raise HTTPException(status_code=404, detail=f"Student ID '{student_id}' not found.")
     return result
+

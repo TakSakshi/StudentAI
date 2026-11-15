@@ -49,3 +49,4 @@ class ModelPerformanceResponse(BaseModel):
     global_feature_importance: List[Dict[str, Any]]
     evaluation_split_info: Dict[str, Any]
     trade_off_analysis: Dict[str, str]
+

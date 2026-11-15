@@ -166,3 +166,4 @@ class AnalyticsService:
             "total_students": total,
             "bands": bands
         }
+

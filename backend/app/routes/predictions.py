@@ -22,3 +22,4 @@ def predict_student_risk(payload: PredictionRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Inference failed: {str(e)}")
+

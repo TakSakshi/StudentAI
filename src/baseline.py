@@ -18,3 +18,4 @@ def build_majority_baseline() -> Pipeline:
         ("classifier", DummyClassifier(strategy="most_frequent"))
     ])
     return pipeline
+

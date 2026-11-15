@@ -127,3 +127,4 @@ if MODEL_METADATA_PATH.exists():
         plt.close()
 
 print(f"All figures generated successfully in: {FIGURES_DIR}")
+

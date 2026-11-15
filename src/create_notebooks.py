@@ -238,3 +238,4 @@ with open(notebooks_dir / "04_model_evaluation.ipynb", "w") as f:
     nbf.write(nb4, f)
 
 print("All 4 Jupyter Notebooks created successfully in notebooks/")
+

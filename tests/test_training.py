@@ -14,3 +14,4 @@ def test_training_pipeline_generates_artifacts():
     assert BEST_MODEL_PATH.exists(), "best_model.pkl must exist after training"
     assert MODEL_METADATA_PATH.exists(), "model_metadata.json must exist after training"
     assert EVALUATION_METRICS_PATH.exists(), "evaluation_metrics.json must exist after training"
+

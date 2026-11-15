@@ -20,3 +20,4 @@ def test_majority_baseline_prediction():
     majority_class = y.mode()[0]
 
     assert (preds == majority_class).all(), "Majority baseline must predict the modal class for all samples"
+

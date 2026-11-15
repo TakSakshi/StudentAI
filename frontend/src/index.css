@@ -4,7 +4,31 @@
 
 @layer base {
   body {
-    @apply bg-background text-main antialiased selection:bg-primary-light selection:text-primary;
+    @apply bg-background text-main antialiased selection:bg-sage-light selection:text-forest;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
+
+  h1, h2, h3, .font-editorial {
+    font-family: 'DM Serif Display', Georgia, serif;
+    letter-spacing: -0.015em;
+  }
+}
+
+/* Custom warm scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F6F4EE;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #DCE8D8;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #BCCFB7;
 }

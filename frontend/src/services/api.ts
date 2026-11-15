@@ -90,3 +90,4 @@ export const getDataPreview = async (params: {
 };
 
 export default api;
+
