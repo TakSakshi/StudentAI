@@ -19,6 +19,23 @@
   }
 }
 
+/* Explicit Brand Utilities for Forest Green Identity */
+.bg-forest {
+  background-color: #244C3C !important;
+}
+.bg-forest-dark {
+  background-color: #142920 !important;
+}
+.bg-forest-hover:hover {
+  background-color: #1C3B2E !important;
+}
+.text-forest {
+  color: #244C3C !important;
+}
+.border-forest {
+  border-color: #244C3C !important;
+}
+
 /* Custom warm scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
